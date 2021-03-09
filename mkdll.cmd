@@ -1,0 +1,1 @@
+g++ -v -shared untis.cpp rpc.cpp -Iinclude --std=c++17 -o untis32.dll -m32 -Llib -lssl -lcrypto -lcrypt32 -lws2_32
