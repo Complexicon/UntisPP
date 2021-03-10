@@ -74,6 +74,9 @@ timetable untis::getLessons(int date) {
 
 	RPCClient::Path("/WebUntis/jsonrpc.do");
 	json result = RPCClient::Request("getTimetable", params, {{"Cookie", str("JSESSIONID=" + sessKey)}})["result"];
+	DWORD written;
+	const char* str = result.dump(4).c_str();
+	WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), (void*)str, cmplx::strlen(str), &written, 0);
 	lesson* array = new lesson[result.size()];
 	for(int i = 0; i < result.size(); i++) {
 		json& el = result[i];

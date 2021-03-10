@@ -1,11 +1,10 @@
 #pragma once
 #include "json.hpp"
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
+using namespace httplib;
 using json = nlohmann::json;
 using namespace std;
-using namespace httplib;
 
 typedef const char* cstr;
 
