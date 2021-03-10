@@ -190,8 +190,12 @@ class String {
 	char& operator[](unsigned_t index) { return index >= len() ? *(char*)0 : strPtr[index]; }
 };
 
+
+
 } // namespace cmplx
+
 
 // legacy typedef
 typedef cmplx::String STRNAME;
+
 #endif

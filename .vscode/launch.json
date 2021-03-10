@@ -10,12 +10,13 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/test.exe",
 			"args": [],
-			"stopAtEntry": false,
+			"stopAtEntry": true,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
-			"externalConsole": false,
+			"externalConsole": true,
 			"MIMode": "gdb",
 			"miDebuggerPath": "gdb32",
+			"preLaunchTask": "make test",
 			"setupCommands": [
 				{
 					"description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",

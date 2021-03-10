@@ -1,19 +1,20 @@
 LIBS=ssl crypto crypt32 ws2_32
-DEBUG=y
-NAME=untis
+DEBUG:=y
+NAME:=untis
 SHARED=y
 IDIR=include
 LDIR=lib
-CC=g++
-64BIT=n
-OPTIMIZELEVEL=2
-CFLAGS=--std=c++17
-LFLAGS=
+64BIT:=n
+OPTIMIZELEVEL:=2
+CFLAGS:=--std=c++17
+LFLAGS:=
 SRC=untis.cpp rpc.cpp httplib.cpp
 
 ODIR=obj
 SRCDIR=src
 OUTFILE=
+TESTFILENAME=test
+CC=g++
 
 ifeq ($(DEBUG),y)
 	CFLAGS+=-g
@@ -24,7 +25,7 @@ else
 endif
 
 ifeq ($(64BIT),n) 
-	64BIT:=-m32
+	32BITFLAG=-m32
 	NAME:=$(NAME)32
 endif
 
@@ -38,16 +39,45 @@ endif
 LDIR?=.
 IDIR?=.
 
-$(ODIR)/%.o: $(SRCDIR)/%.cpp
-	$(CC) -c -o $@ $< $(64BIT) $(CFLAGS) -I$(IDIR)
+.PHONY: clean fresh fresh-test test all status
 
-build: $(patsubst %.cpp,$(ODIR)/%.o,$(SRC))
-	$(CC) -o $(OUTFILE) $^ $(64BIT) $(LFLAGS) -L$(LDIR) $(patsubst %,-l%,$(LIBS))
+$(ODIR)/%.o: $(SRCDIR)/%.cpp | $(ODIR)
+	@echo $(patsubst $(ODIR)/%,%,$@):
+	@$(CC) -c -o $@ $< $(32BITFLAG) $(CFLAGS) -I$(IDIR)
 
-test: build $(patsubst %.cpp,$(ODIR)/%.o,test.cpp)
-	$(CC) -o test.exe $(64BIT) $(filter-out $<,$^) -L. -l$(NAME)
+$(OUTFILE): $(patsubst %.cpp,$(ODIR)/%.o,$(SRC))
+	@echo linking $(OUTFILE)...
+	@$(CC) -o $(OUTFILE) $^ $(32BITFLAG) $(LFLAGS) -L$(LDIR) $(patsubst %,-l%,$(LIBS))
 
-.PHONY: clean
+ $(ODIR):
+	@mkdir $@
+
+$(TESTFILENAME).exe: $(patsubst %.cpp,$(ODIR)/%.o,test.cpp)
+	@echo building $(TESTFILENAME).exe...
+	@$(CC) -o $(TESTFILENAME).exe $(32BITFLAG) $^ -L. -l$(NAME)
+
+status:
+	@echo -------------------------------------------------
+	@echo Sources: $(SRC)
+	@echo Debug: $(if $(subst y,,$(DEBUG)),no,yes)
+	@echo 64-Bit: $(if $(subst y,,$(64BIT)),no,yes)
+ifneq ($(DEBUG),y) 
+	@echo Optimization: O$(OPTIMIZELEVEL)
+endif
+	@echo Shared Library: $(if $(subst y,,$(SHARED)),no,yes)
+	@echo Output File: $(OUTFILE)
+	@echo Libraries: $(LIBS)
+	@echo CFLAGS: $(CFLAGS)
+	@echo -------------------------------------------------
+
+all: status $(OUTFILE)
+test: all $(TESTFILENAME).exe
+fresh: clrscr clean all
+fresh-test: clrscr clean test
+
+clrscr:
+	@cls
 
 clean:
-	rm -f $(ODIR)/*.o $(OUTFILE)
+	@echo cleaning up...
+	@rm -rf $(ODIR) $(OUTFILE)
