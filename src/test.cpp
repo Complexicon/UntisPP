@@ -12,7 +12,7 @@ int main(int argc, char const* argv[]) {
 	GetLessonsFor(0, t, u);
 	for(int i = 0; i < t.lessonsAmt; i++) {
 		const lesson l = t.lessons[i];
-		printf("%s in Raum %s von %s bis %s\n", l.subject, l.room, l.startTime, l.endTime);
+		printf("%s in Raum %s bei %s von %s bis %s\n", l.subject, l.room, l.teacher, l.startTime, l.endTime);
 	}
 
 	system("pause");

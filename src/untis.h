@@ -12,6 +12,7 @@ typedef const char* cstr; // lazy
 typedef struct lesson_struct {
 	cstr subject;
 	cstr room;
+	cstr teacher;
 	cstr startTime;
 	cstr endTime;
 } lesson;

@@ -8,7 +8,7 @@ inline cstr permString(string s) { return eternalstr(s.c_str()); }
 cstr fixTime(int time) {
 	int hr = time / 100;
 	int min = time - hr * 100;
-	return eternalstr(hr + (min < 10 ? ":0" : "0") + min);
+	return eternalstr(hr + (min < 10 ? ":0" : ":") + min);
 }
 
 void CreateUntisInst(untis& u, cstr server, cstr schoolName, cstr user, cstr password) {
@@ -38,6 +38,7 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 						 }},
 						{"showSubstText", true},
 						{"showLsText", true},
+						{"showStudentgroup", true},
 						{"roomFields", {"name"}},
 						{"subjectFields", {"name"}},
 						{"teacherFields", {"name"}},
@@ -56,11 +57,23 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 	lesson* array = new lesson[resSize];
 	for(int i = 0; i < resSize; i++) {
 		array[i] = {0};
+		array[i].startTime = "invalid";
+		array[i].endTime = "invalid";
+		array[i].room = "invalid";
+		array[i].teacher = "invalid";
+		array[i].subject = "invalid";
 		json& el = result[i];
-		array[i].subject = permString(el["su"][0]["name"].get<string>());
-		array[i].room = permString(el["ro"][0]["name"].get<string>());
-		array[i].startTime = fixTime(el["startTime"].get<int>());
-		array[i].endTime = fixTime(el["endTime"].get<int>());
+		try {
+			array[i].room = permString(el["ro"][0]["name"].get<string>());
+			array[i].startTime = fixTime(el["startTime"].get<int>());
+			array[i].endTime = fixTime(el["endTime"].get<int>());
+			array[i].subject = permString(el["su"][0]["name"].get<string>()); // frau weber fix
+
+			Str t = el["sg"].get<string>().c_str();
+			t.substring(t.lastIndexOf('_') + 1);
+			t.doNotDestroy = true;
+			array[i].teacher = t.c_str();
+		} catch(json::exception e) {}
 	}
 
 	timetable.date = date;
