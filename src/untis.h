@@ -1,59 +1,34 @@
 #ifndef UNTIS_H_
 #define UNTIS_H_
-#define getter(variable)                                                                                                       \
-	get_##variable() { return variable; };
 
-typedef const char* cstr;
+#ifdef BUILD_EXPORT
+#define EXPORTED extern "C" __declspec(dllexport)
+#else
+#define EXPORTED extern "C" __declspec(dllimport)
+#endif
 
-/*
+typedef const char* cstr; // lazy
 
-enum day {
-		MONTAG,
-		DIENSTAG,
-		MITTWOCH,
-		DONNERSTAG,
-		FREITAG
-};
-
-*/
-
-class lesson {
-  private:
+typedef struct lesson_struct {
 	cstr subject;
 	cstr room;
 	cstr startTime;
 	cstr endTime;
+} lesson;
 
-  public:
-	void set(cstr subject, cstr room, int startTime, int endTime);
-	cstr getter(subject);
-	cstr getter(room);
-	cstr getter(startTime);
-	cstr getter(endTime);
-};
-
-class timetable {
-  private:
+typedef struct timetable_struct {
 	lesson* lessons;
 	int lessonsAmt;
 	int date;
+} timetable;
 
-  public:
-	int getter(date);
-	int getter(lessonsAmt);
-	timetable(lesson* lessons, int amt, int date);
-	lesson* operator[](unsigned idx);
-};
-
-class untis {
-  private:
+typedef struct untis_struct {
 	cstr sessKey;
 	int pType;
 	int pID;
+} untis;
 
-  public:
-	untis(cstr server, cstr schoolName, cstr user, cstr password);
-	timetable getLessons(int date = 0);
-};
+EXPORTED void CreateUntisInst(untis& inst, cstr server, cstr schoolName, cstr user, cstr password);
+EXPORTED void GetLessonsFor(int date, timetable& timetable, const untis& inst);
 
 #endif

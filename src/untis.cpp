@@ -1,41 +1,17 @@
+#define BUILD_EXPORT
 #include "untis.h"
 #include "rpc.h"
 #include "str.h"
 
-cstr retardedStringFix(string s) {
-	Str key(s.c_str());
-	key.doNotDestroy = true;
-	return key.c_str();
+inline cstr permString(string s) { return eternalstr(s.c_str()); }
+
+cstr fixTime(int time) {
+	int hr = time / 100;
+	int min = time - hr * 100;
+	return eternalstr(hr + (min < 10 ? ":0" : "0") + min);
 }
 
-timetable::timetable(lesson* lessons, int amt, int date) : date(date), lessons(lessons), lessonsAmt(amt) {}
-
-lesson* timetable::operator[](unsigned idx) { return idx < lessonsAmt ? &(lessons[idx]) : 0; }
-
-void lesson::set(cstr subject, cstr room, int startTime, int endTime) {
-	this->subject = subject;
-	this->room = room;
-	int hr = startTime / 100;
-	int min = startTime - hr * 100;
-	Str start;
-	if(min < 10)
-		start = strn(hr + ":0" + min);
-	else
-		start = strn(hr + ":" + min);
-	start.doNotDestroy = true;
-	hr = endTime / 100;
-	min = endTime - hr * 100;
-	Str end;
-	if(min < 10)
-		end = strn(hr + ":0" + min);
-	else
-		end = strn(hr + ":" + min);
-	end.doNotDestroy = true;
-	this->startTime = start.c_str();
-	this->endTime = end.c_str();
-}
-
-untis::untis(cstr server, cstr schoolName, cstr user, cstr password) {
+void CreateUntisInst(untis& u, cstr server, cstr schoolName, cstr user, cstr password) {
 	json params = {{"user", user}, {"password", password}};
 
 	Str serv = strn("https://" + server + ".webuntis.com");
@@ -47,18 +23,18 @@ untis::untis(cstr server, cstr schoolName, cstr user, cstr password) {
 
 	json result = RPCClient::Request("authenticate", params)["result"];
 
-	sessKey = retardedStringFix(result["sessionId"].get<string>());
-	pID = result["personId"].get<int>();
-	pType = result["personType"].get<int>();
+	u.sessKey = permString(result["sessionId"].get<string>());
+	u.pID = result["personId"].get<int>();
+	u.pType = result["personType"].get<int>();
 }
 
-timetable untis::getLessons(int date) {
+void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 	json params = {{"options",
 					{
 						{"element",
 						 {
-							 {"type", pType},
-							 {"id", pID},
+							 {"type", inst.pType},
+							 {"id", inst.pID},
 						 }},
 						{"showSubstText", true},
 						{"showLsText", true},
@@ -73,17 +49,21 @@ timetable untis::getLessons(int date) {
 	}
 
 	RPCClient::Path("/WebUntis/jsonrpc.do");
-	json result = RPCClient::Request("getTimetable", params, {{"Cookie", str("JSESSIONID=" + sessKey)}})["result"];
-	//DWORD written;
-	//const char* str = result.dump(4).c_str();
-	//WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), (void*)str, cmplx::strlen(str), &written, 0);
-	lesson* array = new lesson[result.size()];
-	for(int i = 0; i < result.size(); i++) {
+	json result = RPCClient::Request("getTimetable", params, {{"Cookie", str("JSESSIONID=" + inst.sessKey)}})["result"];
+
+	int resSize = result.size();
+
+	lesson* array = new lesson[resSize];
+	for(int i = 0; i < resSize; i++) {
+		array[i] = {0};
 		json& el = result[i];
-		cstr subject = retardedStringFix(el["su"][0]["name"].get<string>());
-		cstr room = retardedStringFix(el["ro"][0]["name"].get<string>());
-		array[i].set(subject, room, el["startTime"].get<int>(), el["endTime"].get<int>());
+		array[i].subject = permString(el["su"][0]["name"].get<string>());
+		array[i].room = permString(el["ro"][0]["name"].get<string>());
+		array[i].startTime = fixTime(el["startTime"].get<int>());
+		array[i].endTime = fixTime(el["endTime"].get<int>());
 	}
 
-	return timetable(array, result.size(), date);
+	timetable.date = date;
+	timetable.lessons = array;
+	timetable.lessonsAmt = resSize;
 }
