@@ -23,12 +23,12 @@ typedef long integer_t;
 
 #endif
 
-#define op_append(type) \
+#define op_append(type)                                                                                                        \
 	void operator+=(type val) { operator+=(String(val)); }
-#define op_concat(type) \
+#define op_concat(type)                                                                                                        \
 	String operator+(type val) { return operator+(String(val)); }
 
-#define op_assign(type) \
+#define op_assign(type)                                                                                                        \
 	void operator=(type val) { operator=(String(val)); }
 
 namespace cmplx {
@@ -84,8 +84,10 @@ inline char* itoa(integer_t value, unsigned_t minlen = 0, unsigned_t radix = 10,
 	unsigned_t abs = value < 0 && checkSign ? (unsigned_t)-value : (unsigned_t)value;
 	for(; abs && i; abs /= radix) buf[i--] = "0123456789ABCDEF"[abs % radix];
 	while(i > 30 - minlen) buf[i--] = '0';
-	if(checkSign && value < 0) buf[i] = '-';
-	if(value == 0) buf[i] = '0';
+	if(checkSign && value < 0)
+		buf[i] = '-';
+	if(value == 0)
+		buf[i] = '0';
 	char* destBuf = new char[strlen(&buf[i + (value > 0)]) + 1];
 	strcpy(destBuf, &buf[i + (value > 0)]);
 	delete[] buf;
@@ -115,7 +117,8 @@ class String {
 	char* strPtr;
 
 	void init(const char* str) {
-		if(strPtr) delete[] strPtr;
+		if(strPtr)
+			delete[] strPtr;
 		strPtr = new char[strlen(str) + 1];
 		strcpy(strPtr, str);
 	}
@@ -124,7 +127,8 @@ class String {
 		strPtr = 0;
 		doNotDestroy = dnd;
 		init(in);
-		if(freeIn) delete[] in;
+		if(freeIn)
+			delete[] in;
 	}
 
 	static void updateStr(char** pointer, char* newPointer) {
@@ -134,7 +138,8 @@ class String {
 
   public:
 	~String() {
-		if(!doNotDestroy) delete[] strPtr;
+		if(!doNotDestroy)
+			delete[] strPtr;
 	};
 
 	const char* c_str() { return strPtr; }
@@ -144,7 +149,8 @@ class String {
 	void replace(char what, char replace) { strshift(strPtr, what, what, replace - what); };
 
 	void substring(unsigned begin) {
-		if(begin < len()) init(String(strPtr + begin).strPtr);
+		if(begin < len())
+			init(String(strPtr + begin).strPtr);
 	};
 
 	void substring(unsigned_t begin, unsigned_t end) {
@@ -159,7 +165,8 @@ class String {
 		unsigned_t len = 0;
 		unsigned_t lastIndex = 0;
 		while(*(strPtr + len) != '\0') {
-			if(*(strPtr + len) == c) lastIndex = len;
+			if(*(strPtr + len) == c)
+				lastIndex = len;
 			len++;
 		}
 		return lastIndex;
@@ -169,7 +176,8 @@ class String {
 		const char* temp = strPtr;
 		const char* cpr = key;
 		do {
-			if(*cpr != 0) cpr = !(*temp == *cpr++) ? key : cpr;
+			if(*cpr != 0)
+				cpr = !(*temp == *cpr++) ? key : cpr;
 			else
 				return true;
 		} while(*temp++ != 0);

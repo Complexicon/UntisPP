@@ -1,4 +1,4 @@
-LIBS=ssl crypto crypt32 ws2_32
+LIBS=Winhttp
 DEBUG:=y
 NAME:=untis
 SHARED=y
@@ -8,7 +8,7 @@ LDIR=lib
 OPTIMIZELEVEL:=2
 CFLAGS:=--std=c++17
 LFLAGS:=
-SRC=untis.cpp rpc.cpp httplib.cpp
+SRC=untis.cpp
 
 ODIR=obj
 SRCDIR=src

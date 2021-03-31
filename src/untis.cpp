@@ -1,6 +1,11 @@
 #define BUILD_EXPORT
 #include "untis.h"
-#include "rpc.h"
+
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include "winreq.h"
+#include "urihelper.h"
 #include "str.h"
 
 inline cstr permString(string s) { return eternalstr(s.c_str()); }
@@ -8,22 +13,30 @@ inline cstr permString(string s) { return eternalstr(s.c_str()); }
 cstr fixTime(int time) {
 	int hr = time / 100;
 	int min = time - hr * 100;
-	return eternalstr(hr + (min < 10 ? ":0" : "0") + min);
+	return eternalstr(hr + (min < 10 ? ":0" : ":") + min);
+}
+
+json RPCReq(cstr domain, cstr url, cstr method, const json& params, cstr extraHdr = "") {
+	json request = {{"method", method}};
+	request["id"] = "JRPC++";
+	request["jsonrpc"] = "2.0";
+	request["params"] = params;
+	auto x = HttpsWebRequestPost(domain, url, request.dump().c_str(), extraHdr);
+
+	json result = json::parse(x.c_str());
+
+	// err detection
+
+	return result;
 }
 
 void CreateUntisInst(untis& u, cstr server, cstr schoolName, cstr user, cstr password) {
 	json params = {{"user", user}, {"password", password}};
-
-	Str serv = strn("https://" + server + ".webuntis.com");
-	serv.doNotDestroy = true;
-
-	Str path = strn("/WebUntis/jsonrpc.do?school=" + schoolName);
-
-	RPCClient::Set(serv.c_str(), path.c_str());
-
-	json result = RPCClient::Request("authenticate", params)["result"];
+	json result = RPCReq(str(server + ".webuntis.com"), str("/WebUntis/jsonrpc.do?" + uriComponent("school", schoolName)),
+						 "authenticate", params)["result"];
 
 	u.sessKey = permString(result["sessionId"].get<string>());
+	u.server = server;
 	u.pID = result["personId"].get<int>();
 	u.pType = result["personType"].get<int>();
 }
@@ -48,8 +61,8 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 		params["options"]["endDate"] = date;
 	}
 
-	RPCClient::Path("/WebUntis/jsonrpc.do");
-	json result = RPCClient::Request("getTimetable", params, {{"Cookie", str("JSESSIONID=" + inst.sessKey)}})["result"];
+	json result = RPCReq(str(inst.server + ".webuntis.com"), "/WebUntis/jsonrpc.do", "getTimetable", params,
+						 str("Cookie: JSESSIONID=" + inst.sessKey))["result"];
 
 	int resSize = result.size();
 
