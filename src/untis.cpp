@@ -70,10 +70,16 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 	for(int i = 0; i < resSize; i++) {
 		array[i] = {0};
 		json& el = result[i];
+		array[i].isWeird = false;
 		array[i].subject = permString(el["su"][0]["name"].get<string>());
 		array[i].room = permString(el["ro"][0]["name"].get<string>());
 		array[i].startTime = fixTime(el["startTime"].get<int>());
 		array[i].endTime = fixTime(el["endTime"].get<int>());
+
+		if(el.contains("code")) {
+			array[i].isWeird = true;
+			array[i].reason = permString(el["code"].get<string>());
+		}
 	}
 
 	timetable.date = date;

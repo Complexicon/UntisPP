@@ -14,6 +14,8 @@ typedef struct lesson_struct {
 	cstr room;
 	cstr startTime;
 	cstr endTime;
+	bool isWeird;
+	cstr reason;
 } lesson;
 
 typedef struct timetable_struct {
