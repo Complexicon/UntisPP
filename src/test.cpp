@@ -12,6 +12,8 @@ int main(int argc, char const* argv[]) {
 	GetLessonsFor(0, t, u);
 	for(int i = 0; i < t.lessonsAmt; i++) {
 		const lesson l = t.lessons[i];
+		if(l.isWeird)
+			printf("[%s]", l.reason);
 		printf("%s in Raum %s bei %s von %s bis %s\n", l.subject, l.room, l.teacher, l.startTime, l.endTime);
 	}
 

@@ -75,6 +75,7 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 		array[i].room = "invalid";
 		array[i].teacher = "invalid";
 		array[i].subject = "invalid";
+		array[i].isWeird = false;
 		json& el = result[i];
 		try {
 			array[i].room = permString(el["ro"][0]["name"].get<string>());
@@ -86,6 +87,12 @@ void GetLessonsFor(int date, timetable& timetable, const untis& inst) {
 			t.substring(t.lastIndexOf('_') + 1);
 			t.doNotDestroy = true;
 			array[i].teacher = t.c_str();
+
+			if(el.contains("code")) {
+				array[i].isWeird = true;
+				array[i].reason = permString(el["code"].get<string>());
+			}
+
 		} catch(json::exception e) {}
 	}
 
