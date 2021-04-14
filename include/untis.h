@@ -25,6 +25,7 @@ typedef struct timetable_struct {
 
 typedef struct untis_struct {
 	cstr sessKey;
+	cstr server;
 	int pType;
 	int pID;
 } untis;
