@@ -9,29 +9,43 @@
 
 typedef const char* cstr; // lazy
 
-typedef struct lesson_struct {
+class ILesson {
+  public:
 	cstr subject;
 	cstr room;
 	cstr startTime;
 	cstr endTime;
 	bool isWeird;
 	cstr reason;
-} lesson;
+};
 
-typedef struct timetable_struct {
-	lesson* lessons;
-	int lessonsAmt;
-	int date;
-} timetable;
+class ITimetable {
+  public:
+	virtual int LessonAmt() = 0;
+	virtual const ILesson& operator[](unsigned index) = 0;
+};
 
-typedef struct untis_struct {
-	cstr sessKey;
-	cstr server;
-	int pType;
-	int pID;
-} untis;
+class IUntis {
+  public:
+	virtual cstr GetServer() = 0;
+	virtual ITimetable* TimetableFor(int date = 0) = 0;
+};
 
-EXPORTED void CreateUntisInst(untis& inst, cstr server, cstr schoolName, cstr user, cstr password);
-EXPORTED void GetLessonsFor(int date, timetable& timetable, const untis& inst);
+#ifdef DYNAMIC_LOAD
 
+#include <windows.h>
+
+inline bool CreateUntisInst(IUntis** inst, cstr server, cstr schoolName, cstr user, cstr password) {
+	HINSTANCE dll = LoadLibraryA("untis32.dll");
+	if(!dll)
+		return false;
+	return ((bool (*)(IUntis**, cstr, cstr, cstr, cstr))GetProcAddress(dll, "CreateUntisInst"))(inst, server, schoolName, user,
+																								password);
+}
+
+#else
+
+EXPORTED bool CreateUntisInst(IUntis** inst, cstr server, cstr schoolName, cstr user, cstr password);
+
+#endif
 #endif
