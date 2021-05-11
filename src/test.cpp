@@ -9,7 +9,7 @@
 int main(int argc, char const* argv[]) {
 	IUntis* u;
 	CreateUntisInst(&u, SRV, SCHOOL, USER, PASS);
-	ITimetable* t = u->TimetableFor();
+	ITimetable* t = u->TimetableFor(0);
 	for(int i = 0; i < t->LessonAmt(); i++) {
 		const ILesson l = (*t)[i];
 		if(l.isWeird)

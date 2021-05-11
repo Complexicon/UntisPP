@@ -13,7 +13,7 @@ inline cstr permString(string s) { return eternalstr(s.c_str()); }
 cstr fixTime(int time) {
 	int hr = time / 100;
 	int min = time - hr * 100;
-	return eternalstr(hr + (min < 10 ? ":0" : ":") + min);
+	return eternalstr(hr + (min < 10 ? ":0" : ":") + min); // memory leak heaven
 }
 
 json RPCReq(cstr domain, cstr url, cstr method, const json& params, cstr extraHdr = "") {
@@ -43,9 +43,9 @@ class Timetable : public ITimetable {
 		this->date = date;
 	}
 
-	int LessonAmt() { return lessonsAmt; }
+	int API LessonAmt() { return lessonsAmt; }
 
-	const ILesson& operator[](unsigned index) {
+	const ILesson& API operator[](unsigned index) {
 		if(index >= lessonsAmt)
 			throw;
 		return lessons[index];
@@ -71,9 +71,9 @@ class Untis : public IUntis {
 		pType = result["personType"].get<int>();
 	}
 
-	cstr GetServer() { return server; }
+	cstr API GetServer() { return server; }
 
-	ITimetable* TimetableFor(int date) {
+	ITimetable* API TimetableFor(int date) {
 		json params = {{"options",
 						{
 							{"element",

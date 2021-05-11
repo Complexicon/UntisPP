@@ -7,6 +7,8 @@
 #define EXPORTED extern "C" __declspec(dllimport)
 #endif
 
+#define API __cdecl
+
 typedef const char* cstr; // lazy
 
 class ILesson {
@@ -21,14 +23,14 @@ class ILesson {
 
 class ITimetable {
   public:
-	virtual int LessonAmt() = 0;
-	virtual const ILesson& operator[](unsigned index) = 0;
+	virtual int API LessonAmt() = 0;
+	virtual const ILesson& API operator[](unsigned index) = 0;
 };
 
 class IUntis {
   public:
-	virtual cstr GetServer() = 0;
-	virtual ITimetable* TimetableFor(int date = 0) = 0;
+	virtual cstr API GetServer() = 0;
+	virtual ITimetable* API TimetableFor(int date = 0) = 0;
 };
 
 #ifdef DYNAMIC_LOAD
